@@ -3,6 +3,7 @@ import sys
 import requests
 import requests_oauthlib
 import json
+from sql_connection import conn
 
 # Replace the values below with yours
 ACCESS_TOKEN = '1252513694992330753-YpQY1SlyBWIN66ngHXeM8hcZWvvTeZ'
@@ -37,6 +38,10 @@ def send_tweets_to_spark(http_resp, tcp_connection):
                 tweet_text = tweet.encode('utf-8') + '&%' + location + '&%' + time
                 print("Tweet Text: " + tweet_text)
                 tcp_connection.send(tweet_text + '\n')
+                conn.execute(
+                    'INSERT INTO tweet (time, tweet, location) VALUES (%s,%s,%s,%s,%s)',
+                    (str(time), tweet, str(location)))
+                conn.commit()
 
         except:
             e = sys.exc_info()[0]
